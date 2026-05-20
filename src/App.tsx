@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@supabase/supabase-js';
 import { 
   Scale, 
   FileText, 
@@ -47,6 +48,19 @@ interface BookingData {
   descripcion: string;
   fecha: string | null;
   hora: string | null;
+}
+
+const supabase = createClient(
+  'https://rhqdnhgyhvlvgcekauzh.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJocWRuaGd5aHZsdmdjZWthdXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5Nzc2NTAsImV4cCI6MjA5NDU1MzY1MH0.Kzu8FQut_q49yyNPz1-ZKS7ajPJMIHRO-gBUZzV6CU4'
+);
+
+interface Review {
+  id: number;
+  nombre: string;
+  estrellas: number;
+  resena: string;
+  created_at: string;
 }
 
 // --- Components ---
@@ -549,67 +563,261 @@ const Booking = () => {
 };
 
 const Contact = () => {
-  const enviarFormulario = async (event: React.FormEvent<HTMLFormElement>) => {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [nombre, setNombre] = useState('');
+  const [resena, setResena] = useState('');
+  const [estrellas, setEstrellas] = useState(5);
+  const [loading, setLoading] = useState(false);
+  const [errorStatus, setErrorStatus] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  React.useEffect(() => {
+    obtenerResenas();
+
+    let channel: any = null;
+    try {
+      channel = supabase
+        .channel('reviews-channel')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'reviews'
+          },
+          (payload) => {
+            setReviews((prev) => [payload.new as Review, ...prev]);
+          }
+        )
+        .subscribe();
+    } catch (err: any) {
+      console.warn('Realtime subscription not available:', err);
+    }
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, []);
+
+  const obtenerResenas = async () => {
+    setErrorStatus(null);
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error al obtener reseñas de Supabase:', error);
+        setErrorStatus(error.message || 'Error desconocido al solicitar datos');
+      } else if (data) {
+        setReviews(data);
+      }
+    } catch (e: any) {
+      console.error('Excepción al obtener reseñas:', e);
+      setErrorStatus(e.message || 'Error de red o conexión bloqueada');
+    }
+  };
+
+  const enviarResena = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nombre = (document.getElementById("nombre") as HTMLInputElement).value;
-    const email = (document.getElementById("email") as HTMLInputElement).value;
-    const mensaje = (document.getElementById("mensaje") as HTMLTextAreaElement).value;
+    if (!nombre || !resena) {
+      alert('Complete todos los campos');
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      const response = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, email, mensaje })
-      });
+      const { error } = await supabase.from('reviews').insert([
+        {
+          nombre,
+          estrellas,
+          resena
+        }
+      ]);
 
-      if (response.ok) {
-        alert("Mensaje enviado correctamente");
-        (event.target as HTMLFormElement).reset();
-      } else {
-        alert("Error al enviar el mensaje");
+      setLoading(false);
+
+      if (error) {
+        console.error('Error al insertar reseña en Supabase:', error);
+        alert(`Error al enviar reseña: ${error.message} (${error.details || 'sin detalles'})`);
+        return;
       }
-    } catch (error) {
-      console.error(error);
-      alert("Error de conexión");
+
+      setNombre('');
+      setResena('');
+      setEstrellas(5);
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 7000);
+
+      obtenerResenas();
+    } catch (e: any) {
+      setLoading(false);
+      console.error('Excepción al insertar reseña:', e);
+      alert(`Error de conexión al enviar la reseña: ${e.message || 'Error desconocido'}`);
     }
   };
 
   return (
     <section id="contacto" className="py-24 bg-cream">
       <div className="container mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-16">
+        
         <div>
-          <div className="flex items-center gap-3 text-gold text-[11px] uppercase tracking-widest mb-4"><div className="w-8 h-px bg-gold"></div> Encontrarnos</div>
-          <h2 className="font-serif text-4xl text-navy mb-12">Contacto</h2>
-          
-          <form onSubmit={enviarFormulario} className="space-y-4 mb-12">
+          <div className="flex items-center gap-3 text-gold text-[11px] uppercase tracking-widest mb-4">
+            <div className="w-8 h-px bg-gold"></div>
+            Nuestros Clientes
+          </div>
+
+          <h2 className="font-serif text-4xl text-navy mb-12">
+            Reseñas
+          </h2>
+
+          <form onSubmit={enviarResena} className="space-y-4 mb-12">
             <div className="grid grid-cols-1 gap-4">
-              <input type="text" id="nombre" required className="p-4 border border-border focus:border-navy outline-none bg-white text-sm" placeholder="Su nombre completo" />
-              <input type="email" id="email" required className="p-4 border border-border focus:border-navy outline-none bg-white text-sm" placeholder="Su correo electrónico" />
-              <textarea id="mensaje" required className="p-4 border border-border focus:border-navy outline-none bg-white text-sm h-32" placeholder="Escriba su consulta aquí..."></textarea>
+              
+              <input
+                type="text"
+                required
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                className="p-4 border border-border focus:border-navy outline-none bg-white text-sm"
+                placeholder="Su nombre completo"
+              />
+
+              <textarea
+                required
+                value={resena}
+                onChange={(e) => setResena(e.target.value)}
+                className="p-4 border border-border focus:border-navy outline-none bg-white text-sm h-32"
+                placeholder="Escriba su reseña aquí..."
+              />
+
+              <div>
+                <p className="text-[11px] uppercase tracking-widest text-navy mb-3 font-bold">
+                  Calificación
+                </p>
+
+                <div className="flex gap-2">
+                  {[1,2,3,4,5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setEstrellas(star)}
+                      className={`text-3xl transition-all ${
+                        star <= estrellas
+                          ? 'text-gold scale-110'
+                          : 'text-slate-300'
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
-            <button type="submit" className="bg-navy text-white px-8 py-3 rounded-sm font-bold text-[11px] uppercase tracking-widest hover:bg-navy-dark transition-all">
-              Enviar Mensaje
-            </button>
+
+            <div className="flex flex-col gap-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-navy text-white px-8 py-3 rounded-sm font-bold text-[11px] uppercase tracking-widest hover:bg-navy-dark transition-all self-start"
+              >
+                {loading ? 'Publicando...' : 'Publicar Reseña'}
+              </button>
+
+              <AnimatePresence>
+                {submitted && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: -10 }}
+                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -10 }}
+                    className="overflow-hidden mt-2"
+                  >
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-sm text-xs font-semibold flex items-center gap-2 shadow-sm">
+                      <span className="text-emerald-600 font-bold text-base">✓</span> 
+                      Reseña publicada exitosamente
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </form>
 
           <div className="space-y-8">
             <div className="flex gap-4">
-              <div className="w-12 h-12 bg-navy text-white rounded-sm flex items-center justify-center flex-shrink-0"><MapPin size={20}/></div>
-              <div><h4 className="text-[11px] font-bold uppercase tracking-widest text-navy mb-1">Dirección</h4><p className="text-slate-500 text-sm">Entre Ríos 489. Planta Baja, Oficina 2 · Tucumán</p></div>
+              <div className="w-12 h-12 bg-navy text-white rounded-sm flex items-center justify-center flex-shrink-0">
+                <MapPin size={20}/>
+              </div>
+
+              <div>
+                <h4 className="text-[11px] font-bold uppercase tracking-widest text-navy mb-1">
+                  Dirección
+                </h4>
+
+                <p className="text-slate-500 text-sm">
+                  Entre Ríos 489. Planta Baja, Oficina 2 · Tucumán
+                </p>
+              </div>
             </div>
           </div>
         </div>
-        <div className="h-[400px] md:h-auto bg-slate-300 rounded-sm overflow-hidden relative border border-border">
-          <iframe
-            title="Google Maps Location"
-            className="w-full h-full min-h-[350px] border-0"
-            src="https://maps.google.com/maps?q=Entre%20Rios%20489,%20San%20Miguel%20de%20Tucuman,%20Tucuman&t=&z=16&ie=UTF8&iwloc=&output=embed"
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          ></iframe>
+
+        <div className="space-y-6 max-h-[700px] overflow-y-auto pr-2">
+          
+          {errorStatus && (
+            <div className="bg-amber-50/80 border border-amber-200 text-amber-900 p-4 rounded-sm text-xs leading-relaxed shadow-sm">
+              <p className="font-bold text-amber-800 mb-1 flex items-center gap-1">
+                ⚠️ Conexión de Alerta
+              </p>
+              <p className="mb-2">No se pudieron cargar todas las reseñas debido a un límite de red o bloqueo de dominio en su navegador ({errorStatus}).</p>
+              <p className="opacity-75">
+                <strong>Consejo de solución:</strong> Si utiliza protección estricta (como pestañas privadas, Brave Shields o extensiones como uBlock Origin / Privacy Badger), por favor configure una excepción para permitir la lectura segura de datos de la base de datos de <strong>Supabase</strong>.
+              </p>
+            </div>
+          )}
+
+          {reviews.length === 0 && !errorStatus && (
+            <div className="bg-white border border-border p-8 rounded-sm text-center text-slate-400">
+              Aún no hay reseñas publicadas.
+            </div>
+          )}
+
+          {reviews.map((review) => (
+            <motion.div
+              key={review.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white border border-border p-6 rounded-sm shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-bold text-navy text-lg">
+                  {review.nombre}
+                </h4>
+
+                <div className="flex text-gold text-lg">
+                  {'★'.repeat(review.estrellas)}
+                </div>
+              </div>
+
+              <p className="text-slate-600 text-sm leading-relaxed">
+                {review.resena}
+              </p>
+
+              <div className="mt-4 text-[10px] uppercase tracking-widest text-slate-400">
+                {new Date(review.created_at).toLocaleDateString('es-AR')}
+              </div>
+            </motion.div>
+          ))}
+
         </div>
+
       </div>
     </section>
   );
