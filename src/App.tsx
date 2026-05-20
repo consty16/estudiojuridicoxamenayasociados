@@ -28,6 +28,11 @@ import {
   Coins
 } from 'lucide-react';
 
+// --- Utility ---
+const scrollTo = (id: string) => {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+};
+
 // --- Types ---
 type ServiceType = 'Verbal' | 'Escrita' | 'Virtual';
 
@@ -48,32 +53,32 @@ interface BookingData {
 
 const Navbar = () => (
   <nav className="fixed top-0 w-full z-50 bg-navy-dark/95 backdrop-blur-md px-6 md:px-12 py-3 flex justify-between items-center shadow-2xl">
-    <a href="#hero" className="flex items-center">
+    <button onClick={() => scrollTo('hero')} className="flex items-center">
       <img 
         src="/logo.png" 
         alt="Estudio Jurídico Xamena & Asociados" 
         className="h-12 md:h-16 w-auto object-contain scale-105"
         referrerPolicy="no-referrer"
       />
-    </a>
+    </button>
     <ul className="hidden md:flex gap-8 items-center text-white/80">
       <li>
-        <a href="#precios" className="text-[15px] font-normal uppercase tracking-wider hover:text-gold transition-colors">
+        <button onClick={() => scrollTo('precios')} className="text-[15px] font-normal uppercase tracking-wider hover:text-gold transition-colors">
           Honorarios
-        </a>
+        </button>
       </li>
       <li>
-        <a href="#contacto" className="text-[15px] font-normal uppercase tracking-wider hover:text-gold transition-colors">
+        <button onClick={() => scrollTo('contacto')} className="text-[15px] font-normal uppercase tracking-wider hover:text-gold transition-colors">
           Contacto
-        </a>
+        </button>
       </li>
       <li>
-        <a 
-          href="#turnos" 
+        <button 
+          onClick={() => scrollTo('turnos')}
           className="bg-[#e3dab5] text-navy-dark px-[17px] py-2 ml-0 text-[12px] uppercase tracking-wider rounded-sm font-bold hover:bg-gold-light transition-all"
         >
           Agendar Turno
-        </a>
+        </button>
       </li>
     </ul>
   </nav>
@@ -103,12 +108,12 @@ const Hero = () => (
           Defensa de sus derechos con experiencia, ética y compromiso.
         </p>
         <div className="flex flex-wrap gap-4">
-          <a href="#turnos" className="bg-[#e3dab5] text-navy-dark px-8 py-4 rounded-sm font-bold text-sm uppercase tracking-wider hover:bg-gold-light hover:-translate-y-1 transition-all flex items-center gap-2 shadow-lg shadow-gold/20">
+          <button onClick={() => scrollTo('turnos')} className="bg-[#e3dab5] text-navy-dark px-8 py-4 rounded-sm font-bold text-sm uppercase tracking-wider hover:bg-gold-light hover:-translate-y-1 transition-all flex items-center gap-2 shadow-lg shadow-gold/20">
             <Calendar size={18} /> Agendar Consulta
-          </a>
-          <a href="#servicios" className="bg-[#e3dab5] text-navy-dark px-8 py-4 rounded-sm font-bold text-sm uppercase tracking-wider hover:bg-gold-light hover:-translate-y-1 transition-all flex items-center gap-2 shadow-lg shadow-gold/20">
+          </button>
+          <button onClick={() => scrollTo('servicios')} className="bg-[#e3dab5] text-navy-dark px-8 py-4 rounded-sm font-bold text-sm uppercase tracking-wider hover:bg-gold-light hover:-translate-y-1 transition-all flex items-center gap-2 shadow-lg shadow-gold/20">
             Ver Servicios →
-          </a>
+          </button>
         </div>
         
         <div className="mt-10 pt-6 border-t border-white/10 flex gap-10">
@@ -319,9 +324,7 @@ const Booking = () => {
     try {
       const response = await fetch("/api/book-appointment", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       });
 
@@ -498,17 +501,14 @@ const Booking = () => {
                          <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Titular</p>
                          <p className="font-bold text-navy">Santiago Luis Xamena</p>
                        </div>
-                       
                        <div className="bg-white p-4 rounded-sm border border-border/50">
                          <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Alias</p>
                          <p className="font-bold text-navy select-all">chanchi13.mp</p>
                        </div>
-                       
                        <div className="bg-white p-4 rounded-sm border border-border/50">
                          <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">CVU</p>
                          <p className="font-mono text-navy text-xs select-all">0000003100096604181690</p>
                        </div>
-                       
                        <div className="bg-white p-4 rounded-sm border border-border/50">
                          <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Método</p>
                          <p className="font-bold text-navy">Mercado Pago Transferencia</p>
@@ -529,7 +529,6 @@ const Booking = () => {
                      >
                        <MessageSquare size={20} /> Enviar comprobante
                      </a>
-                     
                      <button onClick={() => setStep(1)} className="text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-navy transition-colors">Volver al inicio</button>
                    </div>
                 </motion.div>
@@ -560,9 +559,7 @@ const Contact = () => {
     try {
       const response = await fetch("/api/send-email", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre, email, mensaje })
       });
 
@@ -572,7 +569,6 @@ const Contact = () => {
       } else {
         alert("Error al enviar el mensaje");
       }
-
     } catch (error) {
       console.error(error);
       alert("Error de conexión");
@@ -586,7 +582,7 @@ const Contact = () => {
           <div className="flex items-center gap-3 text-gold text-[11px] uppercase tracking-widest mb-4"><div className="w-8 h-px bg-gold"></div> Encontrarnos</div>
           <h2 className="font-serif text-4xl text-navy mb-12">Contacto</h2>
           
-          <form onBlur={() => {}} onSubmit={enviarFormulario} className="space-y-4 mb-12">
+          <form onSubmit={enviarFormulario} className="space-y-4 mb-12">
             <div className="grid grid-cols-1 gap-4">
               <input type="text" id="nombre" required className="p-4 border border-border focus:border-navy outline-none bg-white text-sm" placeholder="Su nombre completo" />
               <input type="email" id="email" required className="p-4 border border-border focus:border-navy outline-none bg-white text-sm" placeholder="Su correo electrónico" />
@@ -647,11 +643,7 @@ export default function App() {
         className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:bg-[#128C7E] transition-all hover:scale-110 flex items-center justify-center group"
         aria-label="Contactar por WhatsApp"
       >
-        <svg
-          className="w-6 h-6 fill-current"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.705 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
         </svg>
       </a>
