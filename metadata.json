@@ -1,0 +1,6 @@
+{
+  "name": "Xamena & Asociados",
+  "description": "Estudio Jurídico profesional en Tucumán. Especialistas en Derecho Penal, Civil, Accidentes, Divorcios y Sucesiones. Sistema de turnos en línea integrado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
