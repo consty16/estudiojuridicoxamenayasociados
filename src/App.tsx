@@ -238,7 +238,7 @@ const Fees = () => (
         {[
           { type: 'Verbal', icon: <MessageSquare />, price: '$ 335.500', desc: 'Atención presencial en nuestra oficina.' },
           { type: 'Escrita', icon: <FileText />, price: '$ 675.000', desc: 'Dictamen legal detallado por escrito.', featured: true },
-          { type: 'Virtual', icon: <Video />, price: '$ 335.500', desc: 'Videollamada profesional segura.' },
+          { type: 'Virtual', icon: <Video />, price: '$ 167.750', desc: 'Videollamada profesional segura.' },
         ].map((f, idx) => (
           <div key={idx} className={`p-10 rounded-sm border transition-all ${f.featured ? 'bg-gold/10 border-gold' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
             <div className="text-[#e3dab5] mb-6 text-3xl">{f.icon}</div>
@@ -266,7 +266,7 @@ const Booking = () => {
   const services: {id: ServiceType, price: string, desc: string, icon: any}[] = [
     { id: 'Verbal', price: '$ 335.500', desc: 'Atención presencial en oficina.', icon: <MessageSquare size={32} /> },
     { id: 'Escrita', price: '$ 675.000', desc: 'Dictamen legal vía email.', icon: <FileText size={32} /> },
-    { id: 'Virtual', price: '$ 335.500', desc: 'Videollamada profesional.', icon: <Video size={32} /> },
+    { id: 'Virtual', price: '$ 167.750', desc: 'Videollamada profesional.', icon: <Video size={32} /> },
   ];
 
   const steps = [
