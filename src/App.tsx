@@ -83,7 +83,7 @@ const Navbar = () => (
       </li>
       <li>
         <button onClick={() => scrollTo('contacto')} className="text-[15px] font-normal uppercase tracking-wider hover:text-gold transition-colors">
-          Contacto
+          Nuestros Clientes
         </button>
       </li>
       <li>
@@ -191,10 +191,24 @@ const Services = () => {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#B39352] mb-1">Abogado</p>
               <p className="font-serif text-lg font-bold text-navy">Dr. Gustavo José Usandivaras</p>
+                <a
+                href="https://wa.me/5493813008877"
+                target="_blank"
+                className="text-gold-500 hover:underline"
+                >
+                📱 3813008877
+                </a>
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#B39352] mb-1">Abogado</p>
               <p className="font-serif text-lg font-bold text-navy">Dr. Santiago Luis Xamena</p>
+               <a
+               href="https://wa.me/5493815350413"
+               target="_blank"
+               className="text-gold-500 hover:underline"
+               >
+              📱 3815350413
+              </a>
             </div>
           </div>
         </div>
