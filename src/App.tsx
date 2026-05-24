@@ -550,7 +550,7 @@ const Booking = () => {
 
                    <div className="flex flex-col gap-4 items-center">
                      <a 
-                       href={`https://wa.me/5493814216898?text=${encodeURIComponent("Hola, ya realicé la transferencia de mi consulta jurídica. Adjunto comprobante.")}`}
+                       href={`https://wa.me/5493815350413?text=${encodeURIComponent("Hola, ya realicé la transferencia de mi consulta jurídica. Adjunto comprobante.")}`}
                        target="_blank" 
                        rel="noopener noreferrer" 
                        className="bg-[#25d366] text-white px-10 py-5 rounded-sm font-bold text-sm uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-green-500/20 hover:scale-105 transition-all w-full max-w-sm justify-center"
